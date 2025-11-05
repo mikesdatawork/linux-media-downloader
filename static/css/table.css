@@ -1,0 +1,66 @@
+/* table.css - Styling for progress table */
+
+/* Main table styling */
+.progress-table {
+    border-color: rgba(108, 117, 125, 0.3) !important;
+    background-color: transparent !important;
+}
+
+.progress-table th,
+.progress-table td {
+    border-color: rgba(108, 117, 125, 0.3) !important;
+    vertical-align: middle;
+}
+
+/* Progress column styling */
+.progress-table th:first-child {
+    width: 150px;
+}
+
+/* Progress bar styling */
+.progress-table .progress {
+    height: 8px;
+    width: 80%;
+    margin: 0 auto; /* Center the progress bar */
+    background-color: #343a40; /* Darker background for progress bar */
+}
+
+.progress-table .progress-bar {
+    background-color: #198754 !important; /* bg-success color */
+}
+
+/* Font size for table */
+.progress-table {
+    font-size: 0.875rem; /* Small font size */
+}
+
+/* Cell alignment */
+.progress-table .file-name-cell {
+    text-align: left;
+}
+
+.progress-table .progress-cell {
+    text-align: center;
+}
+
+/* General table styling */
+.table {
+    color: #e0e0e0 !important;
+    border-color: rgba(108, 117, 125, 0.5) !important;
+}
+
+.table th,
+.table td {
+    border-color: rgba(108, 117, 125, 0.5) !important;
+    padding: 0.75rem;
+    vertical-align: middle;
+}
+
+.table thead th {
+    background-color: rgba(52, 58, 64, 0.5);
+    border-bottom-width: 2px;
+}
+
+.badge {
+    font-size: 0.7rem;
+}

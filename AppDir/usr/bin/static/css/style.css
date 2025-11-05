@@ -1,0 +1,337 @@
+/* s009_style.css */
+/* Custom styles for YT Media Backup */
+
+/* Base styles */
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+/* Sidebar styling inspired by pro-sidebar-template */
+.sidebar {
+    min-width: 160px;
+    max-width: 160px;
+    width: 160px;
+    height: 100vh;
+    background-color: #1e1e1e;
+    border-right: 1px solid #333;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 1rem;
+    background-color: #343a40;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.sidebar-header a:hover {
+    color: #adb5bd;
+    transform: scale(1.05);
+}
+
+.sidebar-menu {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    width: 100%;
+}
+
+.sidebar-item {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Updated button styles - more minimal and less thick */
+.sidebar-link {
+    display: block;
+    width: 100%;
+    color: #bbb;
+    text-decoration: none;
+    padding: 8px 0;  /* Reduced padding from 12px to 8px */
+    text-align: center; display: flex; justify-content: center; align-items: center;
+    transition: all 0.3s;
+    font-size: 0.8rem;  /* Slightly smaller font */
+    letter-spacing: 0.03rem;  /* Subtle letter spacing for cleaner look */
+    font-weight: 400;  /* Normal font weight */
+    border-bottom: 1px solid rgba(51, 51, 51, 0.2);  /* Very subtle separator */
+}
+
+.sidebar-link:hover {
+    color: white;
+    background-color: rgba(51, 51, 51, 0.5);  /* More subtle hover state */
+    text-decoration: none;
+}
+
+.sidebar-link.active {
+    color: white;
+    background-color: #0d6efd;
+    text-decoration: none;
+    /* No left border */  /* Add a left border accent */
+    border-bottom: none;  /* Remove bottom border for active items */
+}
+
+/* Main content area */
+.main-content {
+    margin-left: 160px;
+    padding: 2rem;
+    min-height: 100vh;
+    width: calc(100% - 160px);
+}
+
+/* Card styles */
+.card {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+
+/* Form controls */
+.form-control, .form-control:focus {
+    background-color: #2c2c2c;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-outline-secondary {
+    color: #bbb;
+    border-color: #555;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #555;
+    border-color: #555;
+    color: white;
+}
+
+/* Tables */
+.table {
+    color: #e0e0e0;
+    border-color: #333;
+}
+
+.table-dark {
+    --bs-table-bg: #1e1e1e;
+    --bs-table-striped-bg: #252525;
+    --bs-table-striped-color: #e0e0e0;
+    --bs-table-active-bg: #333;
+    --bs-table-active-color: #e0e0e0;
+    --bs-table-hover-bg: #333;
+    --bs-table-hover-color: #e0e0e0;
+    border-color: #333;
+}
+
+/* Progress indicators */
+.progress {
+    background-color: #2c2c2c;
+}
+
+/* Circular progress animation */
+svg circle {
+    transition: stroke-dashoffset 0.5s linear;
+}
+
+#individual-progress-circle {
+    transform-origin: center;
+    transform: rotate(-90deg);
+}
+
+#total-progress-circle {
+    transform-origin: center;
+    transform: rotate(-90deg);
+}
+
+/* Links */
+a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+/* Alerts */
+.alert-info {
+    background-color: #132f43;
+    border-color: #175d8a;
+    color: #6cc3e2;
+}
+
+.alert-success {
+    background-color: #132a1c;
+    border-color: #1b5e30;
+    color: #75b798;
+}
+
+.alert-danger {
+    background-color: #2c1319;
+    border-color: #58151c;
+    color: #ea868f;
+}
+
+.alert-warning {
+    background-color: #332a0f;
+    border-color: #664d03;
+    color: #ffda6a;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+    .sidebar {
+        position: static;
+        height: auto;
+        max-width: 100%;
+        width: 100%;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* Typography for landing page */
+.display-4 {
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Remove modal borders */
+.modal-content {
+    border: none;
+}
+
+.card {
+    border: none !important;
+}
+
+.border-secondary {
+    border: none !important;
+}
+
+/* Override border removal for input fields */
+.form-control {
+    border: 1px solid #444 !important;
+}
+
+/* Override for other input containers that need borders */
+.input-group > .form-control {
+    border: 1px solid #444 !important;
+}
+
+/* Flat, square button style matching sidebar */
+.btn-flat {
+    border-radius: 0;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05rem;
+    padding: 0.4rem 0.9rem;
+    transition: all 0.3s;
+    border: none;
+    text-align: center;
+    font-weight: 400;
+}
+
+.btn-flat-primary {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.btn-flat-primary:hover {
+    background-color: #0a58ca;
+    color: white;
+}
+
+.btn-flat-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-flat-danger:hover {
+    background-color: #bb2d3b;
+    color: white;
+}
+
+
+/* Main action buttons - smaller text, moved up 1px */
+.btn-flat {
+    font-size: 0.7rem;
+    padding-top: calc(0.4rem - 1px);
+    padding-bottom: calc(0.4rem + 1px);
+    line-height: 1;
+}
+
+/* Sidebar buttons - text moved down 2px */
+.sidebar-link {
+    padding-top: calc(8px + 2px);
+    padding-bottom: calc(8px - 2px);
+    line-height: 1;
+}
+
+/* Text placement for Begin Backup and Cancel buttons - moved down 3px */
+#start-download, #cancel-download {
+    padding-top: calc(0.4rem + 2px);
+    padding-bottom: calc(0.4rem - 2px);
+    line-height: 1;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 1rem;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}

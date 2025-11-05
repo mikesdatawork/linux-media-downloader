@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+# browser_app.py
+# Fallback version of the app for browser access
+
+import os
+import threading
+from flask import Flask
+
+# Import modules
+from modules.routes.ui import ui_routes
+from modules.routes.api import api_routes
+from modules.config.settings import SECRET_KEY
+
+# Initialize Flask app
+app = Flask(__name__, static_folder='static', template_folder='templates')
+app.config['SECRET_KEY'] = SECRET_KEY
+
+# Register blueprints
+app.register_blueprint(ui_routes)
+app.register_blueprint(api_routes)
+
+if __name__ == '__main__':
+    # Create a custom folder selection functionality for browser mode
+    class BrowserFolderSelector:
+        def openFileDialog(self, isFolder=False):
+            """Simple function that returns the downloads folder path"""
+            # Create a downloads directory in the current folder
+            downloads_dir = os.path.abspath(os.path.join(os.getcwd(), 'downloads'))
+            os.makedirs(downloads_dir, exist_ok=True)
+            return downloads_dir
+
+    # Add this to the Flask app's globals for templates
+    app.jinja_env.globals.update(
+        pywebview=dict(
+            api=BrowserFolderSelector()
+        )
+    )
+    
+    # Show startup message
+    print("\nYT Media Backup is running in browser mode.")
+    print("Open your browser and navigate to: http://127.0.0.1:5000")
+    print("Press Ctrl+C to stop the server.\n")
+    
+    # Run Flask app
+    app.run(debug=False, host='127.0.0.1', port=5000)

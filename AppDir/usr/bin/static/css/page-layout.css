@@ -1,0 +1,56 @@
+/* Consistent page layout styles */
+.page-content {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+}
+
+.page-content .container {
+    max-width: 1200px;
+}
+
+.page-content h1,
+.page-content h2,
+.page-content h3,
+.page-content h4,
+.page-content h5,
+.page-content h6 {
+    margin-bottom: 1rem;
+    color: #e0e0e0;
+}
+
+.page-content h4 {
+    margin-top: 1.5rem;
+    font-size: 1.25rem;
+}
+
+.page-content p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    text-align: left;
+}
+
+.page-content .card {
+    background-color: #1e1e1e;
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.page-content .card-body {
+    padding: 1.5rem;
+}
+
+.page-content .card-title {
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.page-content .table {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.page-content .alert {
+    margin-top: 1.5rem;
+}

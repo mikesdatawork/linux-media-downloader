@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 page-content">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Information</h1>
+            
+            <div class="card bg-dark text-light border-secondary mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Why Backup Your Media Content?</h2>
+                    
+                    <div class="mt-4">
+                        <h4>Content Preservation</h4>
+                        <p>YouTube videos can be removed for various reasons: copyright claims, channel termination, or the creator themselves may delete content. Having local backups ensures you always have access to important content.</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>Platform Independence</h4>
+                        <p>Relying solely on third-party platforms means your access depends on their policies and continued existence. Local backups give you control over your media library.</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>Offline Access</h4>
+                        <p>Backed up content can be accessed without an internet connection, which is useful during travel, in areas with poor connectivity, or when you want to save on data usage.</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>Quality Preservation</h4>
+                        <p>YouTube may change video quality or compression methods over time. Creating backups allows you to preserve content at your preferred quality level.</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>For Content Creators</h4>
+                        <p>If you're a content creator, keeping backups of your own videos is essential. Platform policies can change, and having your original content locally stored provides peace of mind and allows for re-uploading if necessary.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-dark text-light border-secondary">
+                <div class="card-body">
+                    <h2 class="card-title">How to Use This Tool</h2>
+                    
+                    <div class="mt-4">
+                        <h4>Basic Usage</h4>
+                        <ol>
+                            <li>Copy the YouTube URL of the video or playlist you want to back up.</li>
+                            <li>Paste the URL into the input field on the home page.</li>
+                            <li>Select either "Audio" or "Video" format.</li>
+                            <li>Choose a destination folder for the downloaded files.</li>
+                            <li>Click "Begin Backup" to start the download process.</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>Playlist vs. Single Video</h4>
+                        <p>When you paste a URL that's part of a playlist, you'll be asked whether you want to download just that video or the entire playlist. If you choose to download a playlist, a new folder will be created to organize all the files.</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>Understanding Errors and Warnings</h4>
+                        <p>Sometimes, you might encounter errors or warnings during the download process. Here's what they mean:</p>
+                        
+                        <div class="table-responsive mt-3">
+                            <table class="table table-dark">
+                                <thead>
+                                    <tr>
+                                        <th>Message</th>
+                                        <th>Meaning</th>
+                                        <th>Solution</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>"Some files were not backed up"</td>
+                                        <td>The download completed, but not all files in a playlist were successfully downloaded.</td>
+                                        <td>The successfully downloaded files are still available in the destination folder. You can retry the specific failed items.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"Error: Video unavailable"</td>
+                                        <td>The video might be private, removed, or region-restricted.</td>
+                                        <td>Try using a VPN or check if the video is still available on YouTube.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"Trying alternative download method..."</td>
+                                        <td>The primary download method failed, and the application is attempting a backup method.</td>
+                                        <td>This is normal and doesn't require action.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>File Formats</h4>
+                        <p>This tool downloads audio files as MP3 and video files as MP4. The file names are based on the original video titles with special characters removed and spaces replaced with dashes.</p>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4">
+                        <h4 class="alert-heading">Important Note</h4>
+                        <p>Always respect copyright laws and terms of service. This tool is intended for personal backup purposes only. Please use it responsibly and ethically.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

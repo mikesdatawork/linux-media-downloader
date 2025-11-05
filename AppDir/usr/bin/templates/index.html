@@ -1,0 +1,694 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 text-center">
+            <h1 class="display-6 fw-bold mb-5">Media Backup System</h1>
+            
+            <div class="card bg-dark text-light mb-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="youtube-url" class="form-label">Paste in your link</label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+                        <div class="form-text text-muted">Can be single video or playlist</div>
+                        
+                        <!-- Link processing loader -->
+                        <div class="loader-container" id="link-loader">
+                            <span>Processing</span>
+                            <div class="dot-loader">
+                                <div></div><div></div><div></div><div></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6 text-start ps-5">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="download-type" id="audio-option" value="audio" checked>
+                                <label class="form-check-label" for="audio-option">Audio</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="download-type" id="video-option" value="video">
+                                <label class="form-check-label" for="video-option">Video</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 text-start ps-5">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="playlist-mode" id="single-video" value="single" checked>
+                                <label class="form-check-label" for="single-video">Single Video</label>
+                            </div>
+                            <div class="form-check" id="full-playlist-option" style="display: none;">
+                                <input class="form-check-input" type="radio" name="playlist-mode" id="complete-playlist" value="playlist">
+                                <label class="form-check-label" for="complete-playlist" id="complete-playlist-label">Full Playlist</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="folder-path" class="form-label">Select destination folder</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control bg-dark text-light border-secondary" id="folder-path" placeholder="Enter path or use Browse button">
+                            <button class="btn btn-outline-secondary" type="button" id="select-folder">Browse</button>
+                        </div>
+                        <div class="form-text text-muted">Default: ./downloads (if left empty)</div>
+                    </div>
+                    
+                    <button class="btn btn-flat btn-flat-primary mb-3" id="start-download" disabled>Begin Backup</button>
+                    <button class="btn btn-flat btn-flat-danger mb-3 d-none" id="cancel-download">Cancel</button>
+                    
+                    <!-- Table building loader -->
+                    <div class="loader-container" id="table-loader">
+                        <span>Building List</span>
+                        <div class="dot-loader">
+                            <div></div><div></div><div></div><div></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <!-- Playlist total progress (shown only for playlists) -->
+                        <div class="row align-items-center mb-3" id="playlist-progress-container" style="display: none;">
+                            <!-- Playlist information -->
+                            <div class="col-md-12 text-center">
+                                <p class="text-light mb-2" id="playlist-name">-</p>
+                                <!-- Total playlist progress circle -->
+                                <div class="position-relative d-inline-block mb-2">
+                                    <svg width="70" height="70" viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="45" fill="transparent" stroke="#333" stroke-width="10" />
+                                        <circle cx="50" cy="50" r="45" fill="transparent" stroke="#198754" stroke-width="10" 
+                                                stroke-dasharray="282.7" stroke-dashoffset="282.7" 
+                                                id="total-progress-circle" />
+                                        <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" 
+                                              fill="#fff" font-size="20" font-weight="bold" id="total-progress-text">0%</text>
+                                    </svg>
+                                </div>
+                                <p class="text-muted mb-0" id="playlist-progress-text">0 of 0 files completed</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Table -->
+                        <div class="table-responsive" id="progress-table-container" style="display: none;">
+                            <table class="table table-bordered border-secondary text-light progress-table">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center p-1">Progress</th>
+                                        <th class="p-1">Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="progress-table-body">
+                                    <!-- Progress rows will be added here dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4" id="status-message">
+                        <!-- Status messages will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<template id="progress-row-template">
+    <tr>
+        <td class="progress-cell">
+            <span class="progress-number">0%</span>
+        </td>
+        <td class="file-name-cell"></td>
+    </tr>
+</template>
+
+<template id="playlist-progress-row-template">
+    <tr>
+        <td class="file-name-cell"></td>
+        <td class="progress-cell">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </td>
+    </tr>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        let statusIntervalId = null;
+        let default_download_path = './downloads';
+        let expectedFiles = []; // Track all expected files
+        let downloadedFiles = []; // Track downloaded files
+        
+        // Initially hide the "Full Playlist" option
+        $('#full-playlist-option').hide();
+
+        // Set default download path
+        fetch("/api/get-default-path")
+            .then(response => response.json())
+            .then(data => {
+                if (data.path) {
+                    default_download_path = data.path;
+                    $("#folder-path").val(data.path);
+                    updateDownloadButton();
+                }
+            })
+            .catch(error => {
+                console.error("Error getting default path:", error);
+            });
+
+        // Handle cancel button click
+        $('#cancel-download').click(function() {
+            fetch('/api/cancel-download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'cancelled') {
+                    showWarning('Download Cancelled', 'The download process was cancelled.');
+                    clearInterval(statusIntervalId);
+                    resetForm();
+                    // Hide cancel button
+                    $('#cancel-download').addClass("d-none");
+                    // Hide progress table
+                    $('#progress-table-container').hide();
+                }
+            })
+            .catch(error => {
+                showError('Error cancelling download: ' + error);
+            });
+        });
+        
+        // Handle folder selection
+        $('#select-folder').click(function() {
+            try {
+                // Try using pywebview API if available
+                if (window.pywebview && window.pywebview.api && window.pywebview.api.openFileDialog) {
+                    window.pywebview.api.openFileDialog(true)
+                        .then(function(result) {
+                            if (result) {
+                                $('#folder-path').val(result);
+                                updateDownloadButton();
+                            }
+                        });
+                } else {
+                    // Fallback for browser mode - open system file dialog
+                    fetch("/api/open-folder", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ path: $("#folder-path").val() || default_download_path }),
+                    });
+                }
+            } catch (error) {
+                console.error('Error selecting folder:', error);
+                alert('Could not open folder dialog. Please type in the path manually.');
+            }
+        });
+        
+        // Allow manual folder path entry
+        $('#folder-path').on('input', function() {
+            updateDownloadButton();
+        });
+        
+        // Check URL when input changes
+        $('#youtube-url').on('input', function() {
+            const url = $(this).val().trim();
+            if (url && url.includes('youtube.com')) {
+                // Clear any previous check timeout
+                if (window.checkUrlTimeout) {
+                    clearTimeout(window.checkUrlTimeout);
+                }
+                
+                // Show loader immediately for better user feedback
+                $('#link-loader').css('display', 'flex');
+                
+                // Add a small delay to avoid too many API calls while typing
+                window.checkUrlTimeout = setTimeout(function() {
+                    checkIfPlaylist(url);
+                }, 500);
+            } else {
+                // Hide loader if URL is empty or invalid
+                $('#link-loader').css('display', 'none');
+                // Hide "Full Playlist" option
+                $('#full-playlist-option').hide();
+                // Ensure Single Video is selected
+                $('#single-video').prop('checked', true);
+            }
+            updateDownloadButton();
+        });
+
+        // Update download button state
+        function updateDownloadButton() {
+            const url = $('#youtube-url').val().trim();
+            
+            // Simply enable the button if there's any URL text
+            if (url && url.length > 0) {
+                $('#start-download').prop('disabled', false);
+            } else {
+                $('#start-download').prop('disabled', true);
+            }
+        }
+        
+        // Check if URL is a playlist
+        function checkIfPlaylist(url) {
+            // Always show the loader for at least 4 seconds
+            const startTime = new Date().getTime();
+            
+            fetch('/api/check-url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: url }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Calculate how much time has passed
+                const currentTime = new Date().getTime();
+                const elapsedTime = currentTime - startTime;
+                
+                // Function to update UI based on response
+                function updateUI() {
+                    // Hide the loader
+                    $('#link-loader').css('display', 'none');
+                    
+                    if (data.is_playlist) {
+                        // Show "Full Playlist" option
+                        $('#full-playlist-option').show();
+                        
+                        // Update the text for the playlist option
+                        $('#complete-playlist-label').text('Full Playlist (' + data.entries + ' videos)');
+                    } else {
+                        // Hide "Full Playlist" option for single videos
+                        $('#full-playlist-option').hide();
+                        // Ensure Single Video is selected
+                        $('#single-video').prop('checked', true);
+                    }
+                }
+                
+                // If less than 4 seconds have passed, wait for the remainder
+                if (elapsedTime < 4000) {
+                    setTimeout(updateUI, 4000 - elapsedTime);
+                } else {
+                    // Otherwise update immediately
+                    updateUI();
+                }
+            })
+            .catch(error => {
+                console.error('Error checking URL:', error);
+                
+                // Calculate how much time has passed
+                const currentTime = new Date().getTime();
+                const elapsedTime = currentTime - startTime;
+                
+                // Function to handle error case
+                function handleError() {
+                    // Hide loader on error
+                    $('#link-loader').css('display', 'none');
+                    // Hide "Full Playlist" option on error
+                    $('#full-playlist-option').hide();
+                    // Ensure Single Video is selected
+                    $('#single-video').prop('checked', true);
+                }
+                
+                // If less than 4 seconds have passed, wait for the remainder
+                if (elapsedTime < 4000) {
+                    setTimeout(handleError, 4000 - elapsedTime);
+                } else {
+                    // Otherwise update immediately
+                    handleError();
+                }
+            });
+        }
+        
+        // Start download
+        $('#start-download').click(function() {
+            const url = $('#youtube-url').val().trim();
+            let folderPath = $('#folder-path').val().trim();
+            const downloadType = $('input[name="download-type"]:checked').val();
+            
+            // Use default path if not provided
+            if (!folderPath) {
+                folderPath = default_download_path;
+                $('#folder-path').val(folderPath);
+            }
+            
+            if (!url) return;
+            
+            // Get playlist mode
+            let playlistMode = $('input[name="playlist-mode"]:checked').val();
+            
+            // Show the table loader
+            $('#table-loader').css('display', 'flex');
+            
+            // Get info about the URL to set up the table
+            fetch('/api/check-url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: url }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Reset tracking arrays
+                expectedFiles = [];
+                downloadedFiles = [];
+                
+                // Clear the table
+                $('#progress-table-body').empty();
+                
+                if (data.is_playlist && playlistMode === 'playlist') {
+                    // If it's a playlist and user wants the whole playlist
+                    const entries = data.entries || 1;
+                    for (let i = 0; i < entries; i++) {
+                        const videoNumber = i + 1;
+                        expectedFiles.push({
+                            index: i,
+                            filename: `Video ${videoNumber}`,
+                            progress: 0
+                        });
+                        
+                        // Add row with video number
+                        $('#progress-table-body').append(`
+                            <tr id="file-row-${i}">
+                                <td class="progress-cell">
+                                    <span class="progress-number">0%</span>
+                                </td>
+                                <td class="file-name-cell">Video ${videoNumber}</td>
+                            </tr>
+                        `);
+                    }
+                } else {
+                    // Single video
+                    const videoTitle = data.title || "Video download";
+                    expectedFiles.push({
+                        index: 0,
+                        filename: videoTitle,
+                        progress: 0
+                    });
+                    
+                    // Add row with video title
+                    $('#progress-table-body').append(`
+                        <tr id="file-row-0">
+                            <td class="progress-cell">
+                                <span class="progress-number">0%</span>
+                            </td>
+                            <td class="file-name-cell">${videoTitle}</td>
+                        </tr>
+                    `);
+                }
+                
+                // Show the progress table, but keep the loader visible
+                // Do not hide the table loader here - keep it visible until download starts
+                $('#progress-table-container').show();
+                
+                // Start the download
+                startDownload(url, folderPath, downloadType, playlistMode);
+            })
+            .catch(error => {
+                console.error('Error checking URL:', error);
+                
+                // Hide the table loader on error
+                $('#table-loader').css('display', 'none');
+                
+                // Fallback to single row
+                expectedFiles = [{
+                    index: 0,
+                    filename: "Video download",
+                    progress: 0
+                }];
+                
+                // Add placeholder row
+                $('#progress-table-body').empty();
+                $('#progress-table-body').append(`
+                    <tr id="file-row-0">
+                        <td class="progress-cell">
+                            <span class="progress-number">0%</span>
+                        </td>
+                        <td class="file-name-cell">Waiting...</td>
+                    </tr>
+                `);
+                
+                // Show the table
+                $('#progress-table-container').show();
+                
+                // Start the download
+                startDownload(url, folderPath, downloadType, playlistMode);
+            });
+        });
+
+        // Function to start the actual download process
+        function startDownload(url, folderPath, downloadType, playlistMode) {
+            // Reset progress circle
+            updateCircleProgress('total-progress-circle', 'total-progress-text', 0);
+            $('#playlist-name').text('-');
+            $('#playlist-progress-text').text('0 of 0 files completed');
+            $('#playlist-progress-container').hide();
+            $('#status-message').html('');
+            
+            // Disable form elements during download
+            $('#youtube-url, #select-folder, #folder-path, input[name="download-type"], input[name="playlist-mode"], #start-download').prop('disabled', true);
+            
+            // Keep table loader visible until we start getting actual download updates
+            
+            // Start download
+            fetch('/api/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    url: url,
+                    output_dir: folderPath,
+                    download_type: downloadType,
+                    playlist_mode: playlistMode
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'started') {
+                    // Start polling for status updates
+                    if (statusIntervalId) {
+                        clearInterval(statusIntervalId);
+                    }
+                    
+                    // Flag to track if download has actually started
+                    let downloadStarted = false;
+                    
+                    statusIntervalId = setInterval(function() {
+                        fetch('/api/download-status')
+                            .then(response => response.json())
+                            .then(data => {
+                                // Check if this is the first file being downloaded
+                                if (!downloadStarted && data.current_file) {
+                                    downloadStarted = true;
+                                    // Only hide the loader when the first file starts downloading
+                                    $('#table-loader').css('display', 'none');
+                                }
+                                
+                                updateProgressUI(
+                                    data.total_progress, 
+                                    data.current_file, 
+                                    data.total_files, 
+                                    data.completed_files, 
+                                    data.playlist_title, 
+                                    data.is_playlist,
+                                    data.status,
+                                    data  // Pass the entire data object
+                                );
+                                
+                                if (data.status === 'completed') {
+                                    clearInterval(statusIntervalId);
+                                    showSuccess('Backups Completed', ''); // Only show "Backups Completed"
+                                    resetForm();
+                                    // Hide cancel button
+                                    $('#cancel-download').addClass("d-none");
+                                    // Ensure loader is hidden
+                                    $('#table-loader').css('display', 'none');
+                                } else if (data.status === 'completed_with_errors') {
+                                    clearInterval(statusIntervalId);
+                                    showWarning('Backups Completed', ''); // Only show "Backups Completed"
+                                    resetForm();
+                                    // Hide cancel button
+                                    $('#cancel-download').addClass("d-none");
+                                    // Ensure loader is hidden
+                                    $('#table-loader').css('display', 'none');
+                                } else if (data.status === 'error') {
+                                    clearInterval(statusIntervalId);
+                                    showError(data.message || 'An error occurred during download.');
+                                    resetForm();
+                                    // Hide cancel button
+                                    $('#cancel-download').addClass("d-none");
+                                    $('#progress-table-container').hide();
+                                    // Ensure loader is hidden
+                                    $('#table-loader').css('display', 'none');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error checking status:', error);
+                                // Hide the table loader on error
+                                $('#table-loader').css('display', 'none');
+                            });
+                    }, 1000);
+                    
+                    // Show cancel button
+                    $('#cancel-download').removeClass('d-none');
+                } else {
+                    // Hide table loader on error
+                    $('#table-loader').css('display', 'none');
+                    
+                    showError(data.error || 'Failed to start download');
+                    resetForm();
+                    $('#progress-table-container').hide();
+                }
+            })
+            .catch(error => {
+                // Hide table loader on error
+                $('#table-loader').css('display', 'none');
+                
+                showError('Error starting download: ' + error);
+                resetForm();
+                $('#progress-table-container').hide();
+            });
+        }
+
+        // Helper function to update circle progress (only for playlist progress)
+        function updateCircleProgress(circleId, textId, percentage) {
+            const progress = Math.min(Math.round(percentage || 0), 100);
+            const circumference = 2 * Math.PI * 45; // 2πr where r=45
+            const offset = circumference - (progress / 100) * circumference;
+            
+            // Update the circle
+            $(`#${circleId}`).css('stroke-dashoffset', offset);
+            
+            // Update the text
+            $(`#${textId}`).text(`${progress}%`);
+        }
+        
+        // Update progress indicators
+        function updateProgressUI(totalPercentage, currentFile, totalFiles, completedFiles, playlistTitle, isPlaylist, status, data) {
+            // Handle playlist progress if applicable
+            if (isPlaylist) {
+                $('#playlist-progress-container').show();
+                $('#playlist-name').text(getDisplayName(playlistTitle || 'Playlist'));
+                
+                // Calculate total progress based on completed files
+                const totalProgress = totalFiles > 0 ? (completedFiles * 100 / totalFiles) : 0;
+                updateCircleProgress('total-progress-circle', 'total-progress-text', totalProgress);
+                
+                $('#playlist-progress-text').text(`${completedFiles} of ${totalFiles} files completed`);
+            } else {
+                $('#playlist-progress-container').hide();
+            }
+            
+            // Update progress table
+            if (currentFile) {
+                // Find or create the file row
+                let fileIndex = downloadedFiles.findIndex(f => f.filename === currentFile);
+                
+                if (fileIndex === -1) {
+                    // This is a new file
+                    downloadedFiles.push({ filename: currentFile });
+                    fileIndex = downloadedFiles.length - 1;
+                    
+                    // Update the file name in the table
+                    if (fileIndex < expectedFiles.length) {
+                        $(`#file-row-${fileIndex} td.file-name-cell`).text(getDisplayName(currentFile));
+                    }
+                }
+                
+                // Get the progress elements
+                const progressCell = $(`#file-row-${fileIndex} .progress-cell`);
+                const progressNumber = progressCell.find('.progress-number');
+                
+                // Update based on status
+                switch (status) {
+                    case 'downloading':
+                        // Calculate progress percentage
+                        const progress = data.downloaded_bytes && data.total_bytes ? 
+                            (data.downloaded_bytes / data.total_bytes * 100) : 0;
+                        const progressInt = Math.round(progress);
+                        
+                        // Update the percentage display
+                        progressNumber.text(`${progressInt}%`);
+                        break;
+                        
+                    case 'processing':
+                    case 'completed':
+                    case 'completed_with_errors':
+                        progressNumber.text('Complete');
+                        break;
+                        
+                    case 'error':
+                        progressNumber.text('Error');
+                        break;
+                }
+            }
+        }
+        
+        // Helper function to format time
+        function formatTime(seconds) {
+            if (seconds < 60) return `${seconds}s`;
+            if (seconds < 3600) {
+                const minutes = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${minutes}m ${secs}s`;
+            }
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            return `${hours}h ${minutes}m`;
+        }
+        
+        // Helper function to get display name
+        function getDisplayName(filename) {
+            if (!filename) return "";
+            const lastDotIndex = filename.lastIndexOf('.');
+            return lastDotIndex > 0 ? filename.substring(0, lastDotIndex) : filename;
+        }
+        
+        // Show success message
+        function showSuccess(message, subMessage = '') {
+            $('#status-message').html(`
+                <div class="text-success">
+                    <strong>${message}</strong> ${subMessage ? subMessage : ''}
+                </div>
+            `);
+        }
+
+        // Show warning message
+        function showWarning(message, subMessage = '') {
+            $('#status-message').html(`
+                <div class="text-warning">
+                    <strong>${message}</strong> ${subMessage ? subMessage : ''}
+                </div>
+            `);
+        }
+
+        // Show error message
+        function showError(message) {
+            $('#status-message').html(`
+                <div class="text-danger">
+                    <strong>Error:</strong> ${message}
+                </div>
+            `);
+        }
+
+        // Reset form elements
+        function resetForm() {
+            $('#youtube-url, #select-folder, #folder-path, input[name="download-type"], input[name="playlist-mode"], #start-download').prop('disabled', false);
+        }
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loader.css') }}">
+{% endblock %}

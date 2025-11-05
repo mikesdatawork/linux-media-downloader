@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Linux Media Downloader
+Exec=python3 /usr/bin/app.py
+Icon=linux-media-downloader
+Type=Application
+Categories=AudioVideo;Utility;

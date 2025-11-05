@@ -1,0 +1,29 @@
+# AppImage build tools
+linuxdeploy-x86_64.AppImage
+linuxdeploy-plugin-python-x86_64.AppImage
+
+# Python virtual environment
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+
+# System files
+Thumbs.db
+
+# Backup and log files
+*.log
+*.bak
+
+# Data and downloads (optional, comment out if you want to track these)
+#downloads/
+#backups/ 
